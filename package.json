@@ -1,0 +1,16 @@
+{
+  "name": "harmony",
+  "version": "0.9.0",
+  "description": "CLI where the app, the API, and the agent share one score.",
+  "type": "module",
+  "bin": {
+    "harmony": "./bin/harmony.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin"
+  ],
+  "license": "MIT"
+}
