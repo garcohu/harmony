@@ -1,145 +1,123 @@
 # Harmony
 
-The SDK and CLI where the app, the API, and the agent share one score.
-
-The agent does not get a bag of tools. It gets the actions you already wrote, and only the voices you allowed. A missing voice becomes a cadence. A rehearsal can address a write without running it. `ship` holds until that rehearsal matches the live score.
-
-Unison is 1. Harmony will not keep a second score beside the one you can hear.
-
-## Install
-
-Node 20 or newer.
+One app directory. Screens from Expo. Route handlers from Next. AI tools on top of both.
 
 ```bash
-npx github:garcohu/harmony
+npx github:garcohu/harmony init shelf
+cd shelf
+npx harmony dev
 ```
 
-```bash
-npm install github:garcohu/harmony
+`harmony dev` serves the screens and the route handlers on one port. The same files are the iOS and Android tree. This version runs them on web. It does not compile a native binary.
+
+## What it takes from each
+
+| | Expo | Next | Harmony |
+| --- | --- | --- | --- |
+| File is a screen | `app/about.tsx`, `app/index.tsx` | `app/about/page.tsx` | both |
+| Layout | `app/_layout.tsx` and `<Slot />` | `app/layout.tsx` and `{children}` | both, in the same layout |
+| HTTP handler | `app/health+api.ts` | `app/api/hello/route.ts` | both |
+| Dynamic segment | `app/volume/[id].tsx` | `app/volume/[id]/page.tsx` | both |
+| Loading and error | | `loading.tsx`, `error.tsx` | yes |
+| Route group | `(name)` is not in the URL | `(name)` is not in the URL | yes |
+| Dev, build, start | `expo start` | `next dev`, `next build`, `next start` | `harmony dev`, `harmony build`, `harmony start` |
+| Project file | `app.json` | `next.config` | `harmony.json` |
+| Link, params | `Link`, `useRouter`, `useLocalSearchParams` | `Link`, `useRouter`, `useParams` | `Link`, `useRouter`, `useParams` from `harmony/router` |
+
+A browser navigation (`Accept: text/html`) renders the screen. `fetch` on the same path runs the route handler, when one exists.
+
+## A screen and a handler
+
+```tsx
+// app/page.tsx
+import { useEffect, useState } from "react";
+
+export default function Home() {
+  const [hello, setHello] = useState("");
+  useEffect(() => {
+    void fetch("/api/hello").then((response) => response.json()).then((body) => setHello(body.hello));
+  }, []);
+  return <h1>{hello}</h1>;
+}
 ```
 
-The package ships its build. There is nothing to compile on install.
-
-## A score
-
-`harmony.score.json` is the printed contract. `harmony.score.mjs` is the same contract when an action has a function.
-
-```js
-import { defineAction, defineScore } from "harmony";
-
-export default defineScore({
-  name: "counter",
-  unison: 1,
-  summary: "One counter. The agent may read it. It may not reset it.",
-  targets: ["web", "ios", "android"],
-  actions: [
-    defineAction({
-      name: "readCount",
-      kind: "read",
-      summary: "Read the counter.",
-      files: ["app/counter.tsx", "api/counter.ts"],
-      voices: ["app", "api", "agent"],
-      match: ["read", "count"],
-      async run(_input, ctx) {
-        return { detail: `Read by ${ctx.voice}.`, count: 0 };
-      },
-    }),
-    defineAction({
-      name: "resetCount",
-      kind: "write",
-      summary: "Reset the counter. The agent must ask.",
-      files: ["app/counter.tsx", "api/counter.ts"],
-      voices: ["app", "api"],
-      match: ["reset"],
-      run() {
-        return { detail: "Counter reset.", count: 0 };
-      },
-    }),
-  ],
-});
+```ts
+// app/api/hello/route.ts
+export function GET() {
+  return Response.json({ hello: "Harmony" });
+}
 ```
 
-Rules the loader enforces:
+```tsx
+// app/layout.tsx
+import type { ReactNode } from "react";
+import { Link, Slot } from "harmony/router";
 
-- `unison` is `1`
-- action names are camelCase and unique
-- `kind` is `read` or `write`
-- every action has a summary, at least one file, and at least one voice
-- files are relative and cannot contain `..`
-- voices are `app`, `api`, or `agent`
-- inputs are `string`, `number`, or `boolean`
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <div>
+      <Link href="/">Home</Link>
+      {children}
+    </div>
+  );
+}
+```
 
-With no score file in the current directory, the desk opens the built-in **folio**: a reading room where the agent may summarize and may not dispatch.
-
-`harmony init ledger` writes a starter `harmony.score.json` and ignores `.harmony`.
+Use `{children}` or `<Slot />`. A layout can use either.
 
 ## Commands
 
-| Command | What it does |
+| Command | |
 | --- | --- |
-| `init [name]` | Write `harmony.score.json`. Refuses to overwrite. |
-| `check` | Confirm the loaded score. |
-| `score` | Actions and their live voices. |
-| `functions` | Callable signatures. |
-| `show <action>` | One action, its files, and its inputs. |
-| `dev` / `stop` | Bind or release the staff. |
-| `rehearse "<intent>"` | Dry-run. Matching actions are played or refused. Nothing is called. |
-| `call <action> --voice agent` | Run the function if that voice is scored. |
-| `call <action> --dry --input key=value` | Validate and address it. Do not run it. |
-| `cadence` | Open requests from the agent. |
-| `promote c-1` | Grant the agent the action that cadence asked for. |
-| `grant <action> [voice]` | Add a voice. Defaults to `agent`. |
-| `revoke <action> [voice]` | Take a voice back. An action cannot be left silent. |
-| `ship` | Release check. Exit 1 on hold. |
-| `targets` | The surfaces on the score. |
-| `routes` | The files the actions name. |
-| `reset` | Restore the printed voices. |
-| `folio` | Describe the loaded score. |
+| `harmony init [name]` | Write `harmony.json`, `app/page.tsx`, a route handler, a tool, and an agent. |
+| `harmony dev` | Serve web, handlers, and `POST /_harmony/agent`. `--port` chooses the port. |
+| `harmony build` | Bundle the client to `.harmony/build`. |
+| `harmony start` | Serve that bundle. |
+| `harmony routes` | Screens, handlers, tools, agent. |
+| `harmony ask "…"` | Run `app/agent.ts` against the message. |
 
-`--save` on `grant`, `revoke`, or `promote` writes voices back when the score is JSON. A `.mjs` score is code: edit the file.
+`harmony.json`:
 
-Exit `0` when the command holds. Exit `1` when a rehearsal refuses, a call is not scored, or `ship` holds. Exit `2` when the command or the score is malformed.
+```json
+{ "name": "Shelf", "scheme": "shelf", "platforms": ["ios", "android", "web"] }
+```
 
-The live desk is `.harmony/session.json`. It is local. The printed score stays what you committed until you `--save` or edit it.
+## AI, on top
 
-## SDK
+A tool is a function. An agent receives a list of tools. It cannot call anything else, including a tool that exists in the project but was not passed in.
 
-```js
-import { call, defineScore, freshState, rehearse, ship } from "harmony";
+```ts
+import { agent, tool } from "harmony/ai";
 
-const score = defineScore({ /* ... */ });
-let state = freshState(score);
-
-const planned = rehearse(state, score, "read the record and send it");
-state = planned.state;
-
-const result = await call(state, score, {
-  name: "sendRecord",
-  voice: "agent",
-  input: { id: "4" },
+export const summarize = tool({
+  name: "summarize",
+  description: "Summarize the shelf. Nothing is sent.",
+  async run() {
+    return { detail: "Three volumes." };
+  },
 });
 
-if (!result.result.ok) {
-  // result.result.cadenceId is set when the agent asked for a voice
-}
-
-const report = ship(state);
+export default agent({
+  name: "librarian",
+  instructions: "Help the reader. Do not send mail.",
+  tools: [summarize],
+});
 ```
-
-`call` returns `{ state, result }`. A refused agent call files a cadence and does not run the function. `--dry`, and any action with no `run`, returns the detail and does not call.
-
-`rehearse` never calls `run`. It uses each action's `match`: a list of words, or a function on a JavaScript score.
-
-## Folio
 
 ```bash
-harmony dev
-harmony rehearse "summarize the shelf and file the dispatch"
-harmony promote c-1
-harmony rehearse "summarize the shelf and file the dispatch"
-harmony ship
+harmony ask "summarize the shelf"
 ```
 
-The first rehearsal plays `summarizeShelf` and refuses `fileDispatch`. After `promote`, the second rehearsal is clean. `ship` then says clear: you put the write on the score.
+The default model is local. It picks a tool by the words in your message and the tool's name and description. It does not call a network. Pass your own model when you want one:
 
-`call fileDispatch --voice agent` files `c-1` and does not send. Folio's own `run` never sends, even when a voice is allowed. Replace `run` when a write should leave the room.
+```ts
+import { ask } from "harmony/ai";
+
+await ask(librarian, "summarize the shelf", {
+  model: async ({ input, tools }) => ({ tool: tools[0]?.name, input: {} }),
+});
+```
+
+`POST /_harmony/agent` with `{ "input": "summarize the shelf" }` does the same thing while `harmony dev` is running.
+
+See [examples/shelf](examples/shelf) for a screen, a dynamic route, an Expo `+api.ts` handler, and an agent that may summarize and may not dispatch.

@@ -1,54 +1,8 @@
-export {
-  VERSION,
-  UNISON,
-  VOICES,
-  type Voice,
-  type ActionKind,
-  type Field,
-  type ActionInput,
-  type ActionContext,
-  type ActionMatch,
-  type ActionDef,
-  type Score,
-  type Cadence,
-  type Step,
-  type Plan,
-  type Block,
-  type DeskState,
-  type CallResult,
-  type CallOk,
-  type CallNo,
-  type ShipReport,
-} from "./types.js";
-
+export { VERSION, tool, agent, ask, localModel, type Tool, type Agent, type Model, type AskResult, type Field, type ToolContext } from "./ai.js";
 export { HarmonyError, isHarmonyError, type HarmonyCode } from "./errors.js";
-export { defineScore, defineAction, validateScore, dataAction } from "./validate.js";
-export { folioScore, SHELF, initialActions, MANUAL, pickVolume, detailOf } from "./folio.js";
-export { detect } from "./detect.js";
-export {
-  freshState,
-  findAction,
-  scoreAction,
-  parseVoice,
-  rehearse,
-  promote,
-  grant,
-  revoke,
-  readInput,
-  callAction as call,
-  ship,
-  check,
-  signature,
-  resetSession,
-} from "./session.js";
-export {
-  staffBlock,
-  welcomeBlocks,
-  parseLine,
-  tokenize,
-  parseCall,
-  reduce,
-  reduceAsync,
-  type DeskResult,
-} from "./desk.js";
-export { loadScore, loadSession, saveSession, saveVoices, initProject, type LoadedScore } from "./load.js";
+export { json, type RouteContext, type RouteHandler } from "./server.js";
+export { scan, type Project, type Screen, type Endpoint, type ToolFile } from "./scan.js";
+export { matchPath } from "./match.js";
+export { readConfig, type HarmonyConfig } from "./config.js";
+export { initApp } from "./init-app.js";
+export { serve, prepare, type Running } from "./serve.js";

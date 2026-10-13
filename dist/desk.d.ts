@@ -1,22 +1,38 @@
-import type { Block, DeskState, Score, Voice } from "./types.js";
+export type Block = {
+    type: "line";
+    tone: "body" | "quiet" | "italic";
+    text: string;
+} | {
+    type: "echo";
+    text: string;
+} | {
+    type: "staff";
+    app: string;
+    api: string;
+    agent: string;
+} | {
+    type: "step";
+    index: string;
+    name: string;
+    detail: string;
+    refused: boolean;
+} | {
+    type: "gap";
+};
+export type DeskState = {
+    included: string[];
+    lastAsk: {
+        input: string;
+        tool: string | null;
+        text: string;
+    } | null;
+};
 export type DeskResult = {
     state: DeskState;
     blocks: Block[];
     code: 0 | 1 | 2;
 };
-export declare function staffBlock(state: Pick<DeskState, "dev" | "actions">): Block;
-export declare function welcomeBlocks(score?: Score): Block[];
-export declare function parseLine(raw: string): {
-    cmd: string;
-    arg: string;
-};
-export declare function tokenize(input: string): string[];
-export declare function parseCall(arg: string): {
-    name: string;
-    voice: Voice;
-    dry: boolean;
-    input: Record<string, string>;
-};
-export declare function reduce(state: DeskState, raw: string, score?: Score): DeskResult;
-export declare function reduceAsync(state: DeskState, raw: string, score?: Score): Promise<DeskResult>;
+export declare function freshState(): DeskState;
+export declare function welcomeBlocks(): Block[];
+export declare function reduceAsync(state: DeskState, raw: string): Promise<DeskResult>;
 //# sourceMappingURL=desk.d.ts.map

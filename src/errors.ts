@@ -1,11 +1,4 @@
-export type HarmonyCode =
-  | "INVALID_SCORE"
-  | "UNKNOWN_ACTION"
-  | "NOT_SCORED"
-  | "INVALID_INPUT"
-  | "HOLD"
-  | "UNKNOWN_COMMAND"
-  | "IO";
+export type HarmonyCode = "INVALID_PROJECT" | "UNKNOWN_TOOL" | "INVALID_INPUT" | "IO" | "NOT_ALLOWED";
 
 export class HarmonyError extends Error {
   readonly code: HarmonyCode;

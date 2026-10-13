@@ -1,7 +1,7 @@
 {
   "name": "harmony",
-  "version": "1.0.0",
-  "description": "SDK and CLI where the app, the API, and the agent share one score.",
+  "version": "2.0.0",
+  "description": "SDK and CLI. Expo screens and Next route handlers, in one app directory, with AI tools on top.",
   "type": "module",
   "bin": {
     "harmony": "./bin/harmony.js"
@@ -12,6 +12,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./ai": {
+      "types": "./dist/ai.d.ts",
+      "import": "./dist/ai.js"
+    },
+    "./router": {
+      "types": "./dist/router.d.ts",
+      "import": "./dist/router.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
     }
   },
   "files": [
@@ -28,5 +40,14 @@
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test test/*.test.mjs"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "esbuild": "^0.25.12",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2"
+  }
 }
