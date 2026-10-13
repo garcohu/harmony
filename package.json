@@ -1,16 +1,32 @@
 {
   "name": "harmony",
-  "version": "0.9.0",
-  "description": "CLI where the app, the API, and the agent share one score.",
+  "version": "1.0.0",
+  "description": "SDK and CLI where the app, the API, and the agent share one score.",
   "type": "module",
   "bin": {
     "harmony": "./bin/harmony.js"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "bin",
+    "dist",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=20"
   },
-  "files": [
-    "bin"
-  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
   "license": "MIT"
 }
